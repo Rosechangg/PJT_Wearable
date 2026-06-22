@@ -65,13 +65,11 @@ python interactivity_score.py data/augmented_01.csv
 python -c "from interactivity_score import interactivity_score as s; print(s('data/augmented_01.csv'))"
 ```
 
-예시 점수 (virtual/task1 augmented):
+예시 점수:
 
 | 파일 | 점수 |
 |---|---|
 | augmented_01.csv | 56.0 |
-| augmented_02.csv | 47.8 |
-| augmented_03.csv | 44.9 |
 
 ---
 
@@ -114,7 +112,7 @@ python build_calibration.py "../AI_evaluation/new_patient_data/virtual/task1/aug
 | `build_calibration.py` | 기준 데이터에서 `calibration.json` 생성 |
 | `calibration.json` | State별 고정 정규화 범위 + 방향 |
 | `Evaluation_Table2.csv` | 원본 평가표 (State별 방향 근거) |
-| `data/augmented_*.csv` | 예시 입력 |
+| `data/augmented_01.csv` | 예시 입력 (사용자 제공) |
 
 ---
 
