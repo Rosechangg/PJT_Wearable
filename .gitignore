@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .DS_Store
+
+# 파생 데이터 (clean_data.py 로 재생성)
+*_clean.csv

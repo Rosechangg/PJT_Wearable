@@ -23,13 +23,20 @@
 Resistance(-1)  →  Compliant(0)  →  Very Compliant(+0.5)  →  Stiff(+1)
 ```
 
-동일한 task라도 **대상군에 따라 의미가 다르다**는 점이 핵심입니다.
+정상인과 환자 실험은 **별도로 수행**되었고 Task 번호 방향이 서로 반대입니다.
+정상인은 T1(약)→T3(강), 환자는 T1(강)→T3(저항)입니다.
 
 | Task | 정상인 | 환자 |
 |---|---|---|
-| Task 1 | Very Compliant (+0.5) | Stiff (+1) |
+| Task 1 | Highly compliant (+0.5) | **Stiff (+1)** |
 | Task 2 | Compliant (0) | Compliant (0) |
-| Task 3 | Stiff (+1) | Resistance (−1) |
+| Task 3 | **Stiff (+1)** | **Resistant (−1)** |
+
+이 매핑의 근거(원 논문 본문·제어 코드·궤적 반복성 검증)와, 파생 토크의 부호로
+모드를 추론하면 안 되는 이유는 [LABEL_DETERMINATION.md](LABEL_DETERMINATION.md)에 정리했습니다.
+
+> **저항 영역(−1)은 환자 Task 3 단독 출처**입니다(393 세그먼트). 정상인 라벨은 전부 0 이상이므로,
+> 정상인 데이터만으로는 이 축의 보조측 절반만 채워집니다.
 
 ### 모델
 
@@ -89,6 +96,10 @@ Task 간 분산이 큰(변별력 있는) 지표에 높은 가중치를 주고, �
 ```bash
 cd 02_ai_enhanced_evaluation
 
+# 0. 센서 이상치 제거 (권장 선행 단계)
+python clean_data.py           # 리포트만
+python clean_data.py --write   # data/*_clean.csv 생성
+
 # A. Ordinal regression (GPU 필요)
 python ordinal_regression_success.py
 #  -> results/patient_results_ordinal_learning.csv
@@ -111,6 +122,22 @@ python suitability_calculator_4metrics.py
 > `data/result_normal.csv`는 원본 전체(635,883행, 128MB)에서 스크립트가 실제로 사용하는
 > 대상자·반복 구간만 추출한 것입니다(100,365행). 스크립트가 동일 조건으로 다시 필터링하므로
 > **결과는 원본과 완전히 동일**하며, GitHub 파일 크기 제한을 피하기 위한 조치입니다.
+
+### 센서 이상치
+
+두 코호트의 오염원이 다릅니다. `clean_data.py`로 제거합니다(보간하지 않고 샘플 삭제만).
+
+| 코호트 | 오염원 | 제거량 |
+|---|---|---|
+| 정상인 | 각도 이상치 (max 1007°) | 1샘플 (0.001%) |
+| 환자 | **모터 전류 포화** (\|I\| ≈ 174,433 고정값) | **1,526샘플 (3.38%)** |
+
+환자 전류는 정상 관측 최대 1,853과 포화값 174,433 사이에 **샘플이 하나도 없어** 경계가 명확합니다.
+전류 오염은 Eq.2(`τ_motor = −0.00186·I + 0.26813`)를 거쳐 Motor_Torque로, Eq.4를 거쳐
+Human_Torque로 전파됩니다. 제거하면 환자 Task 3의 `|Human_Torque|` 평균이 **18.66 → 4.47**로
+4배 감소하므로, 위 표의 성능 수치는 **재측정이 필요합니다**.
+
+세그먼트는 하나도 소실되지 않습니다(정상 1,200 / 환자 1,173 전부 유지).
 
 ## 의존성
 
