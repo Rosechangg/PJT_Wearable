@@ -1,0 +1,72 @@
+{
+  "M1": {
+    "neuro_stage": "acute",
+    "functional_stage": "passive",
+    "V_gain": 0.0,
+    "R_gain": 0.1,
+    "RI_ratio": 1.0,
+    "K_pass": 0.5,
+    "L_opt": 1.0,
+    "Fmax": 1.0
+  },
+  "M2": {
+    "neuro_stage": "subacute",
+    "functional_stage": "passive",
+    "V_gain": 0.02,
+    "R_gain": 0.8,
+    "RI_ratio": 0.2,
+    "K_pass": 0.6,
+    "L_opt": 1.0,
+    "Fmax": 0.8
+  },
+  "M3": {
+    "neuro_stage": "subacute",
+    "functional_stage": "assisted",
+    "V_gain": 0.2,
+    "R_gain": 0.8,
+    "RI_ratio": 0.2,
+    "K_pass": 0.7,
+    "L_opt": 1.0,
+    "Fmax": 0.8
+  },
+  "M4": {
+    "neuro_stage": "chronic",
+    "functional_stage": "assisted",
+    "V_gain": 0.1,
+    "R_gain": 1.0,
+    "RI_ratio": 0.2,
+    "K_pass": 1.0,
+    "L_opt": 0.8,
+    "Fmax": 0.8
+  },
+  "M5": {
+    "neuro_stage": "chronic",
+    "functional_stage": "active",
+    "V_gain": 0.4,
+    "R_gain": 0.8,
+    "RI_ratio": 0.6,
+    "K_pass": 0.7,
+    "L_opt": 0.95,
+    "Fmax": 0.8
+  },
+  "M6": {
+    "neuro_stage": "chronic",
+    "functional_stage": "active",
+    "V_gain": 0.8,
+    "R_gain": 0.4,
+    "RI_ratio": 0.9,
+    "K_pass": 0.6,
+    "L_opt": 0.995,
+    "Fmax": 0.9
+  },
+  "M0": {
+    "neuro_stage": "normal",
+    "functional_stage": "active",
+    "V_gain": 1.0,
+    "R_gain": 0.3,
+    "RI_ratio": 1.0,
+    "K_pass": 0.5,
+    "L_opt": 1.0,
+    "Fmax": 1.0
+  }
+}

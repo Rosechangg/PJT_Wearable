@@ -37,26 +37,61 @@
 
 → 정상인 라벨 {+0.5, 0, +1} 과 정확히 일치.
 
-## 2. 근거 B — 환자: 제어 코드로 확정
+## 2. 근거 B — 환자: 제어 코드로 세 모드 전부 확정 ★
 
-`interactivity_evaluation/data/patients_m2_m6_task1/M2_상호작용성/task.py`
+출처: [`controller_reference/wearable_robot_mujoco/elbow_vel_cmd.py`](controller_reference/)
+(원본 https://github.com/donghee/wearable_robot_mujoco, MIT, commit `f4c4566`)
 
-**Task 1 = Stiff** (고정 속도, 힘 피드백 없음)
+`control_logic()` 에 세 모드가 모두 정의되어 있다.
+
 ```python
-if upperlimb.get_target_angle() > 90:
-    upperlimb.set_velocity(-1.2)   # flexion
-else:
-    upperlimb.set_velocity(1.2)    # extension
-```
-`get_force()`를 호출하지만 제어에 쓰지 않고 로깅만 한다 → 사람의 힘과 무관하게 로봇이 구동.
+m = 0; c = 100; k = 0
 
-**Task 2 = Compliant** (임피던스 제어)
-```python
-velocity = -0.6 + (delta_force - m*acceleration - k*(current_position - target_angle)) / c
-```
-`delta_force`(사람 힘), 관성 m, 스프링 k, 댐핑 c 를 사용 → 사람 힘에 반응.
+# Task 1 (Stiff)
+velocity = -1.2                                                    # flexion
 
-→ 환자 라벨 T1=+1, T2=0 과 일치.
+# Task 2 (Compliant)
+velocity = -0.6 + (delta_force - m*acceleration - k*(pos-target)) / c
+
+# Task 3 (Resistive)
+velocity = +0.2 + (delta_force - m*acceleration - k*(pos-target)) / c
+```
+
+extension 은 세 모드 모두 `velocity = 1.2`.
+
+### 모드 차이는 flexion 기저 속도(bias) 하나뿐이다
+
+| Task | Mode | flexion bias | 성질 |
+|---|---|---|---|
+| 1 | Stiff | **−1.2** | 힘 피드백 **없음**. 사람과 무관하게 고정 속도 구동 |
+| 2 | Compliant | **−0.6** | 굽히는 방향으로 절반만 보조 |
+| 3 | Resistive | **+0.2** | **부호 반전** — 굽히려는 방향과 반대로 밀어냄 |
+
+`m=0, k=0` 이므로 Task 2·3 은 실질적으로 `velocity = bias + delta_force/100` 인
+순수 힘 추종 제어다(관성·스프링 항은 계수가 0이라 비활성).
+
+### ★★ continuum 라벨이 제어식에서 직접 도출된다
+
+```
+제어 bias:   −1.2       −0.6       +0.2
+              │          │          │
+Continuum:    +1          0         −1
+```
+
+bias 가 단조 증가하고 continuum 이 단조 감소하는 **일대일 대응**이다.
+즉 라벨 −1/0/+1 은 설계자가 임의로 붙인 값이 아니라 **제어 파라미터의 물리적 순서**를 반영한다.
+그리고 **bias = 0 이 보조와 저항의 경계**이므로 continuum 의 0점에도 물리적 의미가 있다.
+
+이는 UIST R1 이 제기한 척도 타당성 문제(*"fundamental issues with the score calculation"*)에
+대한 직접적인 답이 된다. 논문에서 "우리 축은 제어 파라미터의 연속선과 대응한다"고 주장할 수 있다.
+
+### 저항은 모터 OFF 가 아니라 능동 저항이다
+
+Notion 메모의 "모터 off" 는 초기 구상이었고, 실제 구현은 **모터를 켠 채 반대 방향으로 미는**
+능동 저항이다. 따라서 저항 조건에서 모터 전류가 높게 관측되는 것이 **정상**이며,
+데이터(환자 T3 전류 중앙값 713)와 코드가 일치한다.
+
+→ 환자 라벨 T1=+1, T2=0, T3=−1 이 세 모드 모두 코드로 확정.
 
 ## 3. 근거 C — 궤적 반복성 (부호 규약과 무관한 독립 검증)
 
@@ -127,12 +162,13 @@ T3에서 ROM·속도 변동이 모두 최대 → 사람이 저항에 맞서 싸�
 
 | # | 항목 | 상태 |
 |---|---|---|
-| 1 | **환자 Task 3(저항)의 제어 설정값** | ❌ 어느 폴더에도 없음. `보고서/`, `1차시스템통합/`, `previous_work/`, `기술이전/` 전수 확인. 부산대병원 실장비 코드로 추정 |
-| 2 | 시뮬레이터에 Task 3 미구현 | ✅ 확인 — `virtual/task3/` 빈 폴더. 시뮬레이터는 Task 1만 구현(공인인증이 Task1 한정이었기 때문) |
-| 3 | 저항 모드가 능동(모터 ON, 역방향 토크)인지 수동(모터 OFF, 마찰만)인지 | ❌ 데이터는 전류가 높음(중앙값 713) → 능동 저항 시사. Notion 메모는 "모터 off" |
+| 1 | 환자 Task 3(저항)의 제어식 | ✅ **해결** — `elbow_vel_cmd.py` 에 `bias = +0.2` 로 정의 (근거 B) |
+| 2 | 저항이 능동인지 수동인지 | ✅ **해결** — 능동 저항. 모터를 켠 채 역방향으로 밀어냄 |
+| 3 | **Task 3 의 댐핑 계수 `c`** | ❌ `task.py` 에 `#c = 10000  # task 3` 주석이 남아 있음. 실제 실험이 `c=100` 인지 `c=10000` 인지 미확인. **c 가 커지면 저항이 강해지므로 논문에 정확히 기술 필요** |
+| 4 | 정상인 3모드의 제어 파라미터 실수치 | ❌ 원 논문은 "reduced/moderate/increased current limits, impedance gains" 로만 서술. 구체적 수치 없음. UIST R1 이 지적한 항목 |
 
-**단, 1·3이 미해결이어도 라벨은 사용 가능하다.** 라벨은 "T3가 저항 조건이었다"는 실험 설계
-사실에 근거하며, 궤적 변동성(근거 C)이 이를 독립적으로 지지한다.
+`c` 값(3번)은 저항 강도에만 영향을 주고 **모드의 순서(Stiff > Compliant > Resistive)는
+바뀌지 않으므로 라벨은 확정 상태로 사용 가능하다.**
 
 ---
 

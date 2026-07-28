@@ -34,6 +34,18 @@ Resistance(-1)  →  Compliant(0)  →  Very Compliant(+0.5)  →  Stiff(+1)
 
 이 매핑의 근거(원 논문 본문·제어 코드·궤적 반복성 검증)와, 파생 토크의 부호로
 모드를 추론하면 안 되는 이유는 [LABEL_DETERMINATION.md](LABEL_DETERMINATION.md)에 정리했습니다.
+모드를 정의하는 제어 코드 사본은 [controller_reference/](controller_reference/)에 있습니다.
+
+세 모드의 차이는 flexion 기저 속도 하나이며, continuum 라벨과 일대일 대응합니다.
+
+| Task | Mode | flexion bias | Continuum |
+|---|---|---|---|
+| 1 | Stiff | −1.2 | +1 |
+| 2 | Compliant | −0.6 | 0 |
+| 3 | Resistive | **+0.2** (부호 반전) | −1 |
+
+Task 3에서 bias 부호가 뒤집혀 사용자가 굽히려는 방향과 반대로 밀어냅니다.
+**모터를 끄는 방식이 아니라 능동 저항**이므로 저항 조건에서 전류가 높은 것이 정상입니다.
 
 > **저항 영역(−1)은 환자 Task 3 단독 출처**입니다(393 세그먼트). 정상인 라벨은 전부 0 이상이므로,
 > 정상인 데이터만으로는 이 축의 보조측 절반만 채워집니다.
