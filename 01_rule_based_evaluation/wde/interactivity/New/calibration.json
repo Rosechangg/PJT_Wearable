@@ -1,0 +1,25 @@
+{
+  "method": "per-state min-max normalization of human_torque (Module A port)",
+  "source": "https://github.com/donghee/wde-interactivity",
+  "reference_pattern": "../AI_evaluation/new_patient_data/virtual/task1/augmented_*.csv",
+  "reference_files": 36,
+  "percentiles": [
+    5.0,
+    95.0
+  ],
+  "states": {
+    "Flexion": {
+      "lo": -0.8401,
+      "hi": 0.7956,
+      "direction": "higher_torque_higher_score",
+      "n_samples": 1258
+    },
+    "Extension": {
+      "lo": -0.8401,
+      "hi": 0.7956,
+      "direction": "higher_torque_lower_score",
+      "n_samples": 0,
+      "provisional": true
+    }
+  }
+}
