@@ -9,6 +9,7 @@
 |---|---|---|
 | A. Ordinal regression | `ordinal_regression_success.py` | 상호작용을 Resistance–Assistance 연속선 위의 값으로 예측 |
 | B. 환자별 적합성 평가 | `suitability_calculator_4metrics.py` | 환자마다 어떤 제어 모드가 적합한지 4개 지표로 산출 |
+| C. Sim2Real 검증 | [`sim2real_validation/`](sim2real_validation/) | 시뮬레이터가 실제 환자 움직임을 재현하는지 검증 (R² ≥ 0.97) |
 
 ---
 
